@@ -1,4 +1,4 @@
-namespace Reversi.Game
+namespace Reversi.Domain
 {
     public enum StoneType
     {

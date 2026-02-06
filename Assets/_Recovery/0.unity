@@ -1480,6 +1480,53 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &1238675015
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1238675017}
+  - component: {fileID: 1238675016}
+  m_Layer: 0
+  m_Name: Bootstrapper
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1238675016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1238675015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3505f51ab9ebc24fbfcee00b8795361, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Reversi.Application.Bootstrapper
+  gamePresenter: {fileID: 0}
+  boardView: {fileID: 0}
+  gameUI: {fileID: 0}
+--- !u!4 &1238675017
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1238675015}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1320496939
 GameObject:
   m_ObjectHideFlags: 0
@@ -1776,53 +1823,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1693381401}
   m_CullTransparentMesh: 1
---- !u!1 &1807852539
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1807852541}
-  - component: {fileID: 1807852540}
-  m_Layer: 0
-  m_Name: Boostrap
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1807852540
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1807852539}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e3505f51ab9ebc24fbfcee00b8795361, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Reversi.Application.Bootstrapper
-  gamePresenter: {fileID: 0}
-  boardView: {fileID: 0}
-  gameUI: {fileID: 0}
---- !u!4 &1807852541
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1807852539}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1850258702
 GameObject:
   m_ObjectHideFlags: 0
@@ -1833,6 +1833,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1850258704}
   - component: {fileID: 1850258703}
+  - component: {fileID: 1850258705}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1870,6 +1871,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1850258705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1850258702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f748467d42c0744387f1c174b31d129, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Reversi.Presentation.GamePresenter
+  turnTimeLimit: 15
+  isAIEnabled: 1
+  aiDifficulty: 3
 --- !u!1 &2147278258
 GameObject:
   m_ObjectHideFlags: 0
@@ -2010,4 +2026,4 @@ SceneRoots:
   - {fileID: 653235281}
   - {fileID: 2147278263}
   - {fileID: 1082366491}
-  - {fileID: 1807852541}
+  - {fileID: 1238675017}

@@ -1,12 +1,14 @@
 using System;
 
-namespace Reversi.Game
+namespace Reversi.Domain
 {
     [Serializable]
     public struct BoardPosition : IEquatable<BoardPosition>
     {
         public int Row;
         public int Col;
+
+        public static readonly BoardPosition Nowhere = new BoardPosition(-1, -1);
 
         public BoardPosition(int row, int col)
         {

@@ -1,5 +1,5 @@
 using UnityEngine;
-using Reversi.Game;
+using Reversi.Domain;
 
 namespace Reversi.View
 {

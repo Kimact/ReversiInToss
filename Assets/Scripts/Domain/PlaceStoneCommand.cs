@@ -1,6 +1,6 @@
 using System;
 
-namespace Reversi.Game
+namespace Reversi.Domain
 {
     [Serializable]
     public class PlaceStoneCommand
