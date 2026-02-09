@@ -5,22 +5,32 @@ using UnityEngine;
 
 namespace Reversi.Domain
 {
+    /// <summary>
+    /// AI 플레이어
+    /// Negamax 알고리즘 + Alpha-Beta 가지치기 + Transposition Table 사용
+    /// </summary>
     public class AIPlayer
     {
         private StoneType _aiColor;
-        private int _level; // 1 ~ ?
+        private int _level; // 난이도 레벨 (1~)
 
+        /// <summary>
+        /// 난이도 설정 구조체
+        /// </summary>
         private struct DifficultySetting
         {
-            public int MaxDepth;
-            public float ErrorProbability; 
-            public bool UseMobility;
-            public bool UseEndgameSolver;
+            public int MaxDepth;           // 최대 탐색 깊이
+            public float ErrorProbability; // 실수 확률
+            public bool UseMobility;       // 이동성 평가 사용 여부
+            public bool UseEndgameSolver;  // 엔드게임 솔버 사용 여부
         }
 
+        /// <summary>
+        /// 난이도 레벨에 따른 설정 반환
+        /// </summary>
         private DifficultySetting GetDifficultySetting(int level)
         {
-            // Use System.Math for thread safety
+            // 스레드 안전을 위해 System.Math 사용
             int depth = level * 2;
             if (depth < 2) depth = 2;
             if (depth > 12) depth = 12;
@@ -34,17 +44,21 @@ namespace Reversi.Domain
             };
         }
 
+        // Transposition Table 플래그
         private enum TTFlag { Exact, LowerBound, UpperBound }
         
+        /// <summary>
+        /// Transposition Table 엔트리
+        /// </summary>
         private struct TTEntry
         {
-            public int Depth;
-            public int Score;
-            public TTFlag Flag;
-            public BoardPosition BestMove;
+            public int Depth;              // 탐색 깊이
+            public int Score;              // 평가 점수
+            public TTFlag Flag;            // 점수 유형
+            public BoardPosition BestMove; // 최선의 수
         }
         
-        // Key: Zobrist Hash (long)
+        // Zobrist 해시를 키로 사용하는 Transposition Table
         private Dictionary<long, TTEntry> _transpositionTable = new Dictionary<long, TTEntry>();
 
         public AIPlayer(StoneType color, int difficulty)
@@ -53,15 +67,21 @@ namespace Reversi.Domain
             _level = difficulty;
         }
 
+        /// <summary>
+        /// 비동기로 최선의 수 계산
+        /// </summary>
         public async Task<BoardPosition> GetBestMoveAsync(BoardModel board)
         {
-            // Run on thread pool
+            // 스레드 풀에서 실행
             return await Task.Run(() => GetBestMove(board));
         }
 
+        /// <summary>
+        /// 최선의 수 계산 (메인 로직)
+        /// </summary>
         private BoardPosition GetBestMove(BoardModel originalBoard)
         {
-            // Clone the board ONCE for simulation to avoid affecting the live UI
+            // UI에 영향 주지 않도록 보드 복제
             BoardModel board = originalBoard.Clone();
 
             var settings = GetDifficultySetting(_level);
@@ -70,20 +90,20 @@ namespace Reversi.Domain
             if (validMoves.Count == 0) return BoardPosition.Nowhere;
             if (validMoves.Count == 1) return validMoves[0];
 
-            // Thread-safe Random
+            // 스레드 안전 랜덤
             System.Random rng = new System.Random();
 
-            // 1. Error Injection
+            // 1. 실수 주입 (낮은 난이도에서 가끔 랜덤 수 선택)
             if (rng.NextDouble() < settings.ErrorProbability)
             {
                 return validMoves[rng.Next(validMoves.Count)];
             }
 
-            // 2. Endgame Solver Check
+            // 2. 엔드게임 솔버 체크
             int emptyCount = 64 - (board.BlackScore + board.WhiteScore);
             if (settings.UseEndgameSolver && emptyCount <= 12)
             {
-                // Uncapped depth for endgame
+                // 엔드게임은 깊이 제한 없이 탐색
                 settings.MaxDepth = 64; 
             }
 
@@ -91,23 +111,20 @@ namespace Reversi.Domain
 
             BoardPosition bestMove = validMoves[0];
             int maxDepth = settings.MaxDepth;
-            long timeLimit = 2000; 
+            long timeLimit = 2000; // 2초 제한
             
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
             try
             {
+                // 반복 심화 (Iterative Deepening)
                 for (int d = 2; d <= maxDepth; d += 2)
                 {
                     if (sw.ElapsedMilliseconds > timeLimit) break;
                     
                     int val = NegaMax(board, d, int.MinValue + 1, int.MaxValue - 1, _aiColor, settings, sw, timeLimit);
                     
-                    // Retrieve best move from TT for this root state logic (conceptually)
-                    // Or we assume the NegaMax root call updated correct bestMove if we structured it that way.
-                    // But NegaMax internal doesn't return the move.
-                    // We need to re-scan or trust the first node logic.
-                    // Actually, simple way: Extract move from TT of root node.
+                    // TT에서 최선의 수 추출
                     if (_transpositionTable.TryGetValue(board.CurrentHash, out var entry))
                     {
                         if (entry.BestMove.IsValid) bestMove = entry.BestMove;
@@ -119,13 +136,16 @@ namespace Reversi.Domain
             return bestMove;
         }
 
+        /// <summary>
+        /// Negamax 알고리즘 (Alpha-Beta 가지치기 포함)
+        /// </summary>
         private int NegaMax(BoardModel board, int depth, int alpha, int beta, StoneType currentTurn, DifficultySetting settings, System.Diagnostics.Stopwatch sw, long timeLimit)
         {
             if (sw.ElapsedMilliseconds > timeLimit) throw new TimeoutException();
 
             int originalAlpha = alpha;
 
-            // 1. Transposition Table Lookup
+            // 1. Transposition Table 조회
             if (_transpositionTable.TryGetValue(board.CurrentHash, out var ttEntry))
             {
                 if (ttEntry.Depth >= depth)
@@ -138,6 +158,7 @@ namespace Reversi.Domain
                 }
             }
 
+            // 종료 조건: 깊이 0 또는 게임 종료
             if (depth == 0 || board.IsGameOver())
             {
                 return Evaluate(board, currentTurn, settings);
@@ -146,29 +167,24 @@ namespace Reversi.Domain
             var validMoves = board.GetValidMoves(currentTurn);
             if (validMoves.Count == 0)
             {
-                // Pass logic: same player moves again? No, opponent moves.
-                // Reversi rule: if no moves, pass. If opponent also no moves, game over (handled by IsGameOver).
-                // So pass to opponent. Depth convention varies, usually maintain depth or decrement.
-                // Let's decrement to advance simulation.
+                // 패스: 상대방 턴으로 넘어감
                 return -NegaMax(board, depth - 1, -beta, -alpha, currentTurn.Opposite(), settings, sw, timeLimit);
             }
 
-            // 2. Move Ordering
-            // A. TT Best Move (Hash Move)
+            // 2. 수 정렬 (Move Ordering)
+            // A. TT에서 최선의 수 (Hash Move) 먼저
             BoardPosition hashMove = BoardPosition.Nowhere;
             if (ttEntry.BestMove.IsValid) hashMove = ttEntry.BestMove;
 
-            // B. Sort
-            // Sort by: HashMove first, then Static Weight
+            // B. 위치 가중치로 정렬
             validMoves.Sort((a, b) => 
             {
                 if (a.Equals(hashMove)) return -1;
                 if (b.Equals(hashMove)) return 1;
                 
-                // Position Weight Ordering
                 int weightA = BoardModel.PositionWeights[a.Row, a.Col];
                 int weightB = BoardModel.PositionWeights[b.Row, b.Col];
-                return weightB.CompareTo(weightA); // Descending
+                return weightB.CompareTo(weightA); // 내림차순
             });
 
             int bestVal = int.MinValue;
@@ -187,10 +203,10 @@ namespace Reversi.Domain
                 }
                 
                 alpha = Math.Max(alpha, val);
-                if (alpha >= beta) break;
+                if (alpha >= beta) break; // 가지치기
             }
 
-            // 3. Store in TT
+            // 3. TT에 저장
             var newEntry = new TTEntry
             {
                 Depth = depth,
@@ -199,7 +215,7 @@ namespace Reversi.Domain
                 Flag = (bestVal <= originalAlpha) ? TTFlag.UpperBound : (bestVal >= beta) ? TTFlag.LowerBound : TTFlag.Exact
             };
             
-            // Should we overwrite? Standard: overwrite if new depth >= old depth
+            // 더 깊은 탐색 결과가 있으면 덮어쓰기
             if (!_transpositionTable.ContainsKey(board.CurrentHash) || depth >= _transpositionTable[board.CurrentHash].Depth)
             {
                 _transpositionTable[board.CurrentHash] = newEntry;
@@ -208,57 +224,53 @@ namespace Reversi.Domain
             return bestVal;
         }
         
-         // Helper overload for recursive calls without re-checking stopwatch too aggressively if needed, 
-         // but simpler to keep one method signature. I'll stick to the one above but fix the call signature in loop.
-
+        // 재귀 호출용 오버로드
         private int NegaMax(BoardModel board, int depth, int alpha, int beta, StoneType currentTurn, DifficultySetting settings, System.Diagnostics.Stopwatch sw, long timeLimit, bool checkTime)
         {
-             return NegaMax(board, depth, alpha, beta, currentTurn, settings, sw, timeLimit);
+            return NegaMax(board, depth, alpha, beta, currentTurn, settings, sw, timeLimit);
         }
 
+        /// <summary>
+        /// 보드 상태 평가 함수
+        /// </summary>
         private int Evaluate(BoardModel board, StoneType currentTurn, DifficultySetting settings)
         {
-             // Perspective: currentTurn is the player to evaluate FOR.
-             // BoardModel scores are absolute Black/White.
-             
-             int myScore, oppScore;
-             int myWeightScore, oppWeightScore;
-             
-             if (currentTurn == StoneType.Black)
-             {
-                 myScore = board.BlackScore; oppScore = board.WhiteScore;
-                 myWeightScore = board.BlackWeightScore; oppWeightScore = board.WhiteWeightScore;
-             }
-             else
-             {
-                 myScore = board.WhiteScore; oppScore = board.BlackScore;
-                 myWeightScore = board.WhiteWeightScore; oppWeightScore = board.BlackWeightScore;
-             }
-             
-             int score = 0;
-             
-             // 1. Position Weights
-             score += (myWeightScore - oppWeightScore) * 2;
-             
-             // 2. Parity (Late Game)
-             if (myScore + oppScore > 48)
-             {
-                 score += (myScore - oppScore) * 5;
-             }
-             
-             // 3. Mobility (Conditional)
-             if (settings.UseMobility)
-             {
-                 // Fast mobility check: just count valid moves. expensive but necessary for high difficulty
-                 int myMoves = board.GetValidMoves(currentTurn).Count;
-                 int oppMoves = board.GetValidMoves(currentTurn.Opposite()).Count;
-                 score += (myMoves - oppMoves) * 5;
-                 
-                 // Corner Capture Bonus (Simple check)
-                 // This is partly covered by PositionWeights, but explicit state check can be good
-             }
-             
-             return score;
+            // currentTurn 관점에서 평가
+            int myScore, oppScore;
+            int myWeightScore, oppWeightScore;
+            
+            if (currentTurn == StoneType.Black)
+            {
+                myScore = board.BlackScore; oppScore = board.WhiteScore;
+                myWeightScore = board.BlackWeightScore; oppWeightScore = board.WhiteWeightScore;
+            }
+            else
+            {
+                myScore = board.WhiteScore; oppScore = board.BlackScore;
+                myWeightScore = board.WhiteWeightScore; oppWeightScore = board.BlackWeightScore;
+            }
+            
+            int score = 0;
+            
+            // 1. 위치 가중치 점수
+            score += (myWeightScore - oppWeightScore) * 2;
+            
+            // 2. 패리티 (후반전)
+            if (myScore + oppScore > 48)
+            {
+                score += (myScore - oppScore) * 5;
+            }
+            
+            // 3. 이동성 (조건부)
+            if (settings.UseMobility)
+            {
+                // 유효한 수 개수로 이동성 평가
+                int myMoves = board.GetValidMoves(currentTurn).Count;
+                int oppMoves = board.GetValidMoves(currentTurn.Opposite()).Count;
+                score += (myMoves - oppMoves) * 5;
+            }
+            
+            return score;
         }
     }
 }
