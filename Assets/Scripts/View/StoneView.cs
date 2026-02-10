@@ -12,7 +12,7 @@ namespace Reversi.View
     {
         private MeshRenderer _meshRenderer;
         private Vector3 _targetScale = Vector3.one;
-        
+
         private StoneType _currentType = StoneType.None;
         public StoneType CurrentType => _currentType;
 
@@ -29,20 +29,20 @@ namespace Reversi.View
             // Cylinder는 모서리가 각져서 깨져 보임(Aliasing). Sphere는 둥글어서 훨씬 부드러움.
             GameObject stoneMesh = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             stoneMesh.transform.SetParent(transform, false);
-            
+
             // 납작한 타원형 (바둑돌 모양)
             stoneMesh.transform.localScale = new Vector3(1f, 0.2f, 1f);
-            
+
             // [중요] 납작한 면이 카메라(Z축)를 향하도록 90도 회전
             // Sphere 기본형은 모든 방향이 같지만, scale을 (1, 0.2, 1)로 줄였으므로
             // 눕혀진 호떡 모양임. 이걸 세워야 정면에서 원으로 보임.
             stoneMesh.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            
+
             // 콜라이더 제거
             Destroy(stoneMesh.GetComponent<Collider>());
 
             _meshRenderer = stoneMesh.GetComponent<MeshRenderer>();
-            
+
             // 그림자 설정
             _meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
             _meshRenderer.receiveShadows = true;
@@ -74,7 +74,7 @@ namespace Reversi.View
         {
             gameObject.SetActive(false);
         }
-        
+
         public void SaveTargetScale()
         {
             _targetScale = transform.localScale;
@@ -92,10 +92,10 @@ namespace Reversi.View
 
             bool isNewSpawn = (_currentType == StoneType.None);
             _currentType = type;
-            
+
             gameObject.SetActive(true);
             UpdateMaterial();
-            
+
             transform.rotation = Quaternion.identity;
 
             if (isNewSpawn)
@@ -112,7 +112,7 @@ namespace Reversi.View
         public void Flip(StoneType newType)
         {
             if (_currentType == newType) return;
-            
+
             transform.DOKill();
 
             // 1. 점프 (위로)
@@ -124,17 +124,17 @@ namespace Reversi.View
             // 2. 세로 회전 (Vertical Flip)
             // X축을 기준으로 회전해야 위/아래로 뒤집힘
             Sequence flipSeq = DOTween.Sequence();
-            
+
             // 90도까지 회전 (RotateMode.LocalAxisAdd 사용)
             flipSeq.Append(transform.DORotate(new Vector3(180, 0, 0), 0.35f, RotateMode.LocalAxisAdd).SetEase(Ease.InOutQuad));
-            
+
             // 딱 중간(0.175초)에 머티리얼 교체
-            flipSeq.InsertCallback(0.175f, () => 
+            flipSeq.InsertCallback(0.175f, () =>
             {
                 _currentType = newType;
                 UpdateMaterial();
             });
-            
+
             flipSeq.OnComplete(() => transform.rotation = Quaternion.identity);
         }
 

@@ -9,7 +9,7 @@ namespace Reversi.Utils
     public static class StyleHelper
     {
         private static Texture2D _whiteTexture;
-        
+
         public static Texture2D WhiteTexture
         {
             get
@@ -28,7 +28,7 @@ namespace Reversi.Utils
         {
             Texture2D tex = new Texture2D(width, height);
             Color[] pixels = new Color[width * height];
-            
+
             Color baseColor = new Color32(40, 110, 60, 255); // 딥 그린
             Color noiseColor = new Color32(50, 130, 70, 255);
 
@@ -36,14 +36,14 @@ namespace Reversi.Utils
             {
                 for (int x = 0; x < width; x++)
                 {
-                    float noise = Mathf.PerlinNoise(x * 0.1f, y * 0.1f) * 0.5f + 
+                    float noise = Mathf.PerlinNoise(x * 0.1f, y * 0.1f) * 0.5f +
                                   Mathf.PerlinNoise(x * 0.5f, y * 0.5f) * 0.3f +
                                   Random.Range(-0.05f, 0.05f);
-                    
+
                     pixels[y * width + x] = Color.Lerp(baseColor, noiseColor, noise);
                 }
             }
-            
+
             DrawGridLines(pixels, width, height);
 
             tex.SetPixels(pixels);
@@ -66,7 +66,7 @@ namespace Reversi.Utils
                 for (int y = 0; y < height; y++)
                 {
                     SetPixelSafe(pixels, width, x, y, gridColor);
-                    SetPixelSafe(pixels, width, x+1, y, gridColor);
+                    SetPixelSafe(pixels, width, x + 1, y, gridColor);
                 }
             }
 
@@ -76,7 +76,7 @@ namespace Reversi.Utils
                 for (int x = 0; x < width; x++)
                 {
                     SetPixelSafe(pixels, width, x, y, gridColor);
-                    SetPixelSafe(pixels, width, x, y+1, gridColor);
+                    SetPixelSafe(pixels, width, x, y + 1, gridColor);
                 }
             }
 
@@ -92,11 +92,11 @@ namespace Reversi.Utils
             int py = row * ch;
             Color pointColor = new Color(0, 0, 0, 0.8f);
             int radius = 3;
-            for(int y = -radius; y <= radius; y++)
+            for (int y = -radius; y <= radius; y++)
             {
-                for(int x = -radius; x <= radius; x++)
+                for (int x = -radius; x <= radius; x++)
                 {
-                    if (x*x + y*y <= radius*radius)
+                    if (x * x + y * y <= radius * radius)
                         SetPixelSafe(pixels, width, px + x, py + y, pointColor);
                 }
             }
@@ -122,7 +122,7 @@ namespace Reversi.Utils
             {
                 for (int x = 0; x < width; x++)
                 {
-                    float grain = Mathf.PerlinNoise(x * 0.05f, y * 0.005f) + 
+                    float grain = Mathf.PerlinNoise(x * 0.05f, y * 0.005f) +
                                   Mathf.PerlinNoise(x * 0.1f, y * 0.1f) * 0.3f;
                     pixels[y * width + x] = Color.Lerp(darkWood, lightWood, grain);
                 }

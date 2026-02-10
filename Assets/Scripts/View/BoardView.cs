@@ -14,9 +14,9 @@ namespace Reversi.View
     {
         private StoneView[,] _stoneViews = new StoneView[8, 8];
         private List<GameObject> _highlightObjects = new List<GameObject>();
-        
+
         private Camera _mainCamera;
-        
+
         // 보드 크기 관련 상수
         private const float BOARD_SIZE = 8.5f;
         private const float CELL_SIZE = BOARD_SIZE / 8f;
@@ -40,12 +40,12 @@ namespace Reversi.View
         public void Initialize(BoardModel boardModel)
         {
             if (boardModel == null) return;
-            
+
             boardModel.OnStoneChanged -= HandleStoneChanged;
             boardModel.OnStonesFlipped -= HandleStonesFlipped;
             boardModel.OnStoneChanged += HandleStoneChanged;
             boardModel.OnStonesFlipped += HandleStonesFlipped;
-            
+
             RefreshBoard(boardModel);
         }
 
@@ -100,14 +100,14 @@ namespace Reversi.View
             boardObj.transform.localScale = new Vector3(BOARD_SIZE, BOARD_SIZE, 1f);
             boardObj.transform.localPosition = new Vector3(0, 0, 0f);
             Material boardMat = new Material(Shader.Find("Unlit/Texture"));
-            boardMat.mainTexture = StyleHelper.CreateFeltTexture(512, 512); 
+            boardMat.mainTexture = StyleHelper.CreateFeltTexture(512, 512);
             boardObj.GetComponent<MeshRenderer>().material = boardMat;
 
             if (!boardObj.GetComponent<MeshCollider>()) boardObj.AddComponent<MeshCollider>();
 
             // 3. 조명
             GameObject lightGO = new GameObject("BoardLight");
-            lightGO.transform.SetParent(transform); 
+            lightGO.transform.SetParent(transform);
             var light = lightGO.AddComponent<Light>();
             light.type = LightType.Directional;
             light.intensity = 1.3f;
@@ -123,7 +123,7 @@ namespace Reversi.View
                 {
                     GameObject stoneObj = new GameObject($"Stone_{x}_{y}");
                     stoneObj.transform.SetParent(transform, false);
-                    
+
                     // Row 0 = Top (+Y)
                     float posX = _startOffset + x * CELL_SIZE;
                     float posY = _startOffset + (7 - y) * CELL_SIZE;
@@ -132,7 +132,7 @@ namespace Reversi.View
                     StoneView stoneView = stoneObj.AddComponent<StoneView>();
                     stoneView.SaveTargetScale();
                     stoneView.InitializeVisuals();
-                    
+
                     _stoneViews[x, y] = stoneView; // [Col, Row]
                 }
             }
@@ -191,14 +191,14 @@ namespace Reversi.View
             {
                 GameObject highlight = new GameObject("Highlight");
                 highlight.transform.SetParent(transform, false);
-                
+
                 float posX = _startOffset + move.Col * CELL_SIZE;
                 float posY = _startOffset + (7 - move.Row) * CELL_SIZE;
                 highlight.transform.localPosition = new Vector3(posX, posY, -0.15f);
 
                 SpriteRenderer sr = highlight.AddComponent<SpriteRenderer>();
                 sr.sprite = StyleHelper.CreateCircleSprite(64, new Color(1, 1, 1, 0.4f));
-                
+
                 highlight.transform.localScale = Vector3.one * (CELL_SIZE * 0.4f);
                 highlight.transform.DOScale(CELL_SIZE * 0.5f, 0.6f).SetLoops(-1, LoopType.Yoyo);
                 _highlightObjects.Add(highlight);
