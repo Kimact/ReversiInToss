@@ -14,21 +14,26 @@ namespace Reversi.Application
         [SerializeField] private BoardView boardView;
         [SerializeField] private GameUI gameUI;
 
-        private void Start()
+private void Start()
         {
-            // 할당되지 않은 경우 자동 검색
             if (gamePresenter == null) gamePresenter = Object.FindFirstObjectByType<GamePresenter>();
             if (boardView == null) boardView = Object.FindFirstObjectByType<BoardView>();
             if (gameUI == null) gameUI = Object.FindFirstObjectByType<GameUI>();
 
-            if (gamePresenter != null && boardView != null && gameUI != null)
+            if (gamePresenter != null && boardView != null)
             {
                 gamePresenter.Initialize(boardView, gameUI);
-                Debug.Log("MVP 아키텍처 초기화 완료.");
+                Debug.Log("MVP \uc544\ud0a4\ud14d\ucc98 \ucd08\uae30\ud654 \uc644\ub8cc.");
+
+                // UI\uac00 \uc5c6\uc73c\uba74 \uc790\ub3d9 \uac8c\uc784 \uc2dc\uc791
+                if (gameUI == null)
+                {
+                    gamePresenter.StartGame(true, 1);
+                }
             }
             else
             {
-                Debug.LogError("MVP 초기화 실패: 필요한 컴포넌트가 없습니다.");
+                Debug.LogError("MVP \ucd08\uae30\ud654 \uc2e4\ud328: \ud544\uc694\ud55c \ucef4\ud3ec\ub10c\ud2b8\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.");
             }
         }
     }
