@@ -20,6 +20,9 @@ private void Start()
             if (boardView == null) boardView = Object.FindFirstObjectByType<BoardView>();
             if (gameUI == null) gameUI = Object.FindFirstObjectByType<GameUI>();
 
+            // 앱인토스 TossService 초기화
+            //InitializeTossService();
+
             if (gameManager != null && boardView != null)
             {
                 gameManager.Initialize(boardView, gameUI);
@@ -36,5 +39,20 @@ private void Start()
                 Debug.LogError("MVP \ucd08\uae30\ud654 \uc2e4\ud328: \ud544\uc694\ud55c \ucef4\ud3ec\ub10c\ud2b8\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.");
             }
         }
+
+        /// <summary>
+        /// 앱인토스 TossService 싱글톤을 찾거나 자동 생성합니다.
+        /// </summary>
+        //private void InitializeTossService()
+        //{
+        //    var tossService = Object.FindFirstObjectByType<TossService>();
+        //    if (tossService == null)
+        //    {
+        //        var go = new GameObject("[TossService]");
+        //        tossService = go.AddComponent<TossService>();
+        //        Debug.Log("[GameInitializer] TossService 자동 생성.");
+        //    }
+        //    tossService.Initialize();
+        //}
     }
 }

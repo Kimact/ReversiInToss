@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "im.toss.apps-in-toss-unity-sdk": "https://github.com/toss/apps-in-toss-unity-sdk.git#release/v1.10.0",
     "com.unity.2d.animation": "12.0.2",
     "com.unity.2d.aseprite": "2.0.1",
     "com.unity.2d.psdimporter": "11.0.1",

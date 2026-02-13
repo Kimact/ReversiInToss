@@ -5,18 +5,13 @@ using UnityEngine;
 
 namespace Reversi.Game
 {
-    /// <summary>
-    /// AI 플레이어
-    /// Negamax 알고리즘 + Alpha-Beta 가지치기 + Transposition Table 사용
-    /// </summary>
+  
     public class AIPlayer
     {
         private StoneType _aiColor;
         private int _level; // 난이도 레벨 (1~)
 
-        /// <summary>
-        /// 난이도 설정 구조체
-        /// </summary>
+    
         private struct DifficultySetting
         {
             public int MaxDepth;           // 최대 탐색 깊이
@@ -25,12 +20,10 @@ namespace Reversi.Game
             public bool UseEndgameSolver;  // 엔드게임 솔버 사용 여부
         }
 
-        /// <summary>
-        /// 난이도 레벨에 따른 설정 반환
-        /// </summary>
+      
         private DifficultySetting GetDifficultySetting(int level)
         {
-            // 스레드 안전을 위해 System.Math 사용
+          
             int depth = level * 2;
             if (depth < 2) depth = 2;
             if (depth > 12) depth = 12;
@@ -47,9 +40,7 @@ namespace Reversi.Game
         // Transposition Table 플래그
         private enum TTFlag { Exact, LowerBound, UpperBound }
         
-        /// <summary>
-        /// Transposition Table 엔트리
-        /// </summary>
+     
         private struct TTEntry
         {
             public int Depth;              // 탐색 깊이
@@ -136,9 +127,7 @@ namespace Reversi.Game
             return bestMove;
         }
 
-        /// <summary>
-        /// Negamax 알고리즘 (Alpha-Beta 가지치기 포함)
-        /// </summary>
+       
         private int NegaMax(BoardModel board, int depth, int alpha, int beta, StoneType currentTurn, DifficultySetting settings, System.Diagnostics.Stopwatch sw, long timeLimit)
         {
             if (sw.ElapsedMilliseconds > timeLimit) throw new TimeoutException();

@@ -6,10 +6,7 @@ using Reversi.UI;
 
 namespace Reversi.Manager
 {
-    /// <summary>
-    /// 게임 매니저 (기존 GamePresenter)
-    /// MVP 패턴의 Presenter - 뷰와 모델 간 중재자 역할
-    /// </summary>
+
     public class GameManager : MonoBehaviour
     {
         // 뷰 참조
@@ -41,9 +38,6 @@ namespace Reversi.Manager
             _boardModel = new BoardModel();
         }
 
-        /// <summary>
-        /// 프레젠터 초기화 (뷰 연결 및 이벤트 구독)
-        /// </summary>
         public void Initialize(BoardView boardView, GameUI gameUI)
         {
             _boardView = boardView;
@@ -59,17 +53,13 @@ namespace Reversi.Manager
             }
         }
 
-        /// <summary>
-        /// 리플레이 시작
-        /// </summary>
+
         private void StartReplay()
         {
             StartCoroutine(ReplayRoutine());
         }
 
-        /// <summary>
-        /// 리플레이 코루틴
-        /// </summary>
+  
         private System.Collections.IEnumerator ReplayRoutine()
         {
             // 1. 히스토리 유지하며 보드 리셋
@@ -100,9 +90,7 @@ namespace Reversi.Manager
             }
         }
 
-        /// <summary>
-        /// 게임 시작
-        /// </summary>
+
         public void StartGame(bool useAI, int difficulty)
         {
             isAIEnabled = useAI;
@@ -120,6 +108,12 @@ namespace Reversi.Manager
             _boardModel.Initialize();
             _commandHistory.Clear();
             
+            //// 앱인토스: 유저 키 로그
+            //if (TossService.Instance != null && TossService.Instance.IsInitialized)
+            //{
+            //    Debug.Log($"[앱인토스] 유저 키: {TossService.Instance.UserKey}");
+            //}
+            
             // UI 업데이트
             _gameUI?.ShowGamePanel();
             
@@ -130,9 +124,7 @@ namespace Reversi.Manager
             SetState(GameState.BlackTurn);
         }
 
-        /// <summary>
-        /// 게임 리셋
-        /// </summary>
+ 
         public void ResetGame()
         {
             SetState(GameState.Waiting);
@@ -143,17 +135,12 @@ namespace Reversi.Manager
             _boardView?.RefreshBoard(_boardModel);
         }
 
-        /// <summary>
-        /// 보드 클릭 이벤트 핸들러
-        /// </summary>
         private void HandleBoardClick(BoardPosition pos)
         {
             TryPlaceStone(pos);
         }
 
-        /// <summary>
-        /// 돌 놓기 시도
-        /// </summary>
+     
         public void TryPlaceStone(BoardPosition pos)
         {
             if (!_currentState.IsPlaying()) return;
@@ -169,12 +156,12 @@ namespace Reversi.Manager
 
             _boardModel.PlaceStone(pos, currentStone);
             
+            // 앱인토스: 돌 놓을 때 햅틱 피드백
+            //TossService.Instance?.TriggerHaptic("Tap");
+            
             ProcessNextTurn();
         }
 
-        /// <summary>
-        /// 다음 턴 처리
-        /// </summary>
         private void ProcessNextTurn()
         {
             if (_boardModel.IsGameOver())
@@ -215,9 +202,7 @@ namespace Reversi.Manager
             }
         }
         
-        /// <summary>
-        /// AI 턴 처리 코루틴
-        /// </summary>
+ 
         private System.Collections.IEnumerator ProcessAITurn()
         {
             yield return new WaitForSeconds(1f);
@@ -243,9 +228,7 @@ namespace Reversi.Manager
             }
         }
 
-        /// <summary>
-        /// 게임 종료 처리
-        /// </summary>
+    
         private void EndGame()
         {
             SetState(GameState.GameOver);
@@ -255,12 +238,17 @@ namespace Reversi.Manager
             if (black > white) winner = StoneType.Black;
             else if (white > black) winner = StoneType.White;
             
+            //// 앱인토스: 게임 종료 시 햅틱 (승리=Heavy, 그 외=Light)
+            //if (TossService.Instance != null)
+            //{
+            //    bool playerWon = (winner == StoneType.Black);
+            //    TossService.Instance.TriggerHaptic(playerWon ? "Heavy" : "Light");
+            //}
+            
             _gameUI?.ShowGameResult(winner, black, white);
         }
 
-        /// <summary>
-        /// 게임 상태 설정
-        /// </summary>
+
         private void SetState(GameState newState)
         {
             _currentState = newState;
@@ -270,9 +258,7 @@ namespace Reversi.Manager
             _boardView?.UpdateHighlights(_boardModel, _currentState.GetCurrentStone());
         }
 
-        /// <summary>
-        /// 턴 타이머 업데이트
-        /// </summary>
+       
         private void UpdateTurnTimer()
         {
             _turnTimer -= Time.deltaTime;
